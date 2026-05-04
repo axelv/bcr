@@ -1,0 +1,44 @@
+id: be.fhir.bcr
+canonical: https://www.ehealth.fgov.be/standards/fhir/registries/bcr
+name: BCR
+title: Belgian Cancer Registry on FHIR
+description: FHIR Implementation Guide for the Belgian Cancer Registry (BCR).
+status: draft
+version: 0.1.0
+fhirVersion: 4.0.1
+copyrightYear: 2026+
+releaseLabel: ci-build
+license: CC0-1.0
+jurisdiction: urn:iso:std:iso:3166#BE "Belgium"
+
+publisher:
+  name: eHealth Platform Belgium
+  url: https://www.ehealth.fgov.be
+  email: info@ehealth.fgov.be
+
+dependencies:
+  hl7.fhir.uv.extensions.r4: 5.2.0
+
+parameters:
+  apply-publisher: true
+  apply-jurisdiction: true
+  apply-version: true
+  show-inherited-invariants: false
+
+pages:
+  index.md:
+    title: Home
+  background.md:
+    title: Background
+  downloads.md:
+    title: Downloads
+
+menu:
+  Home: index.html
+  Background: background.html
+  Artifacts: artifacts.html
+  Downloads: downloads.html
+
+# Define FHIR Shorthand FSH-only project? Set false to keep IG generation enabled.
+FSHOnly: false
+applyExtensionMetadataToRoot: true
