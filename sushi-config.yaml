@@ -30,12 +30,21 @@ pages:
     title: Home
   background.md:
     title: Background
+  dataflow.md:
+    title: Data flow
+  models.md:
+    title: Models
+  terminology.md:
+    title: Terminology
   downloads.md:
     title: Downloads
 
 menu:
   Home: index.html
   Background: background.html
+  Data flow: dataflow.html
+  Models: models.html
+  Terminology: terminology.html
   Artifacts: artifacts.html
   Downloads: downloads.html
 

@@ -6,9 +6,15 @@ input-cache/
 temp/
 qa/
 
+# IG Publisher generates this from narrative-page conformance statements
+Requirements-fromNarrative.json
+
 # IG Publisher artefacts
 *.tgz
 *.zip
+
+# Local Claude Code state (per-project allow/deny cache)
+.claude/
 
 # OS
 .DS_Store
