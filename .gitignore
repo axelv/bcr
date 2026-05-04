@@ -16,6 +16,9 @@ Requirements-fromNarrative.json
 # Local Claude Code state (per-project allow/deny cache)
 .claude/
 
+# Local SUSHI install (lockfile is committed; node_modules is not)
+node_modules/
+
 # OS
 .DS_Store
 Thumbs.db
