@@ -12,9 +12,13 @@ Requirements-fromNarrative.json
 # IG Publisher artefacts
 *.tgz
 *.zip
+txCache/
 
 # Local Claude Code state (per-project allow/deny cache)
 .claude/
+
+# Playwright MCP runtime state (local UI verification)
+.playwright-mcp/
 
 # Local SUSHI install (lockfile is committed; node_modules is not)
 node_modules/

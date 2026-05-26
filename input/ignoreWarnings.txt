@@ -3,3 +3,8 @@
 # One stanza per suppressed warning. Add the literal warning text below,
 # preceded by a `# Reason: <why we are suppressing this>` comment.
 # See: https://confluence.hl7.org/display/FHIR/Implementation+Guide+Parameters
+
+# Reason: We use `tab` on http://hl7.org/fhir/questionnaire-item-control for
+# top-level group itemControl. The code is defined in the SDC IG, not in core
+# FHIR's hl7.terminology, so the validator reports it as unknown.
+Unknown_Code_in_Version
