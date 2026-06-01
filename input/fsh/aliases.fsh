@@ -15,3 +15,12 @@ Alias: $v3-RoleCode = http://terminology.hl7.org/CodeSystem/v3-RoleCode
 Alias: $ssin = https://www.ehealth.fgov.be/standards/fhir/NamingSystem/ssin
 Alias: $nihii = https://www.ehealth.fgov.be/standards/fhir/NamingSystem/nihii
 Alias: $cbe = https://www.ehealth.fgov.be/standards/fhir/NamingSystem/cbe
+
+// SDC (Structured Data Capture) — extraction & population extensions.
+// hl7.fhir.uv.sdc has no FHIR R5 release, so these stable canonical URLs are
+// referenced as bare strings (not loaded as a package); see ignoreWarnings.txt.
+Alias: $sdcExtract = http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemExtractionContext
+Alias: $sdcLaunchContext = http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext
+Alias: $sdcLaunch = http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext
+Alias: $sdcInitial = http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-initialExpression
+Alias: $sdcItemPopCtx = http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemPopulationContext

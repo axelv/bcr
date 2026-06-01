@@ -90,7 +90,7 @@ links. Applies to **every** Questionnaire.
 
 | Path | Purpose |
 |---|---|
-| `input/fsh/instances/ExampleBCRDummyQuestionnaire.fsh` | Canonical questionnaire definition. ~30 items mirroring the Cancer Registration Form, with `definition` URIs pointing at the `bcr-cancer-registration-form` logical model. |
+| `input/fsh/questionnaires/BCRCancerRegistrationFormQuestionnaire.fsh` | Canonical questionnaire definition. ~30 items mirroring the Cancer Registration Form, with `definition` URIs pointing at the `bcr-cancer-registration-form` logical model. Carries SDC extraction (`itemExtractionContext`) and population (`launchContext` + `initialExpression`) extensions. |
 | `tiro-template/` | Forked IG template package (from `fhir.base.template`). Contains all build machinery. |
 | `tiro-template/package/package.json` | Template identity: `health.tiro.fhir.template@0.1.0`, `based-on: fhir.base.template`. |
 | `ig.ini` | `template = https://github.com/Tiro-health/ig-template-fhir`. |
@@ -130,7 +130,7 @@ Attachments) as tabs.
    vendored same-origin so it no longer triggers a script-src error.
 3. **SDC `$populate` returns 422.** The Tiro SDC backend at
    `sdc.tiro.health/fhir/r5` does not recognize our canonical
-   (`…/Questionnaire/ExampleBCRDummyQuestionnaire`) and rejects pre-population.
+   (`…/Questionnaire/BCRCancerRegistrationFormQuestionnaire`) and rejects pre-population.
    The form still renders fully editable — only auto-population fails.
 4. **Template version pinning.** `ig.ini` references the template by plain
    GitHub URL, which resolves to the default branch (`master`). Builds float
@@ -138,8 +138,9 @@ Attachments) as tabs.
 
 ## Things still to consider
 
-- Rename `ExampleBCRDummyQuestionnaire` → something more accurate (e.g.
-  `BCRCancerRegistrationFormQuestionnaire`). Cascades to filenames + FSH id.
+- Migrate the extraction extension from `itemExtractionContext` (STU4) to
+  `definitionExtract` once `hl7.fhir.uv.sdc` ships a FHIR R5 / STU5 release,
+  and drop the corresponding `ignoreWarnings.txt` suppressions.
 - Decide whether to register the Tiro item-control CodeSystem
   (`http://fhir.tiro.health/CodeSystem/tiro-item-control`) in this IG or treat
   it as external.

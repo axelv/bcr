@@ -73,18 +73,28 @@ Grade of differentiation. Codes:
 """
 * differentiationGrade from BCRDifferentiationGradeVS (required)
 
-// TNM (most recent UICC edition)
-* clinicalT 0..1 string "Clinical T (cT)" "Clinical T category (UICC TNM)."
-* clinicalN 0..1 string "Clinical N (cN)" "Clinical N category (UICC TNM)."
-* clinicalM 0..1 string "Clinical M (cM)" "Clinical M category (UICC TNM)."
+// TNM (most recent UICC edition). Top-level categories are coded; subcategories
+// (T1a, N2b, …) are allowed via the extensible bindings.
+* clinicalT 0..1 code "Clinical T (cT)" "Clinical T category (UICC TNM)."
+* clinicalT from BCRTNMTVS (extensible)
+* clinicalN 0..1 code "Clinical N (cN)" "Clinical N category (UICC TNM)."
+* clinicalN from BCRTNMNVS (extensible)
+* clinicalM 0..1 code "Clinical M (cM)" "Clinical M category (UICC TNM)."
+* clinicalM from BCRTNMMVS (extensible)
 
-* pathologicalT 0..1 string "Pathological T (pT)" "Pathological T category (UICC TNM)."
-* pathologicalN 0..1 string "Pathological N (pN)" "Pathological N category (UICC TNM)."
-* pathologicalM 0..1 string "Pathological M (pM)" "Pathological M category (UICC TNM)."
+* pathologicalT 0..1 code "Pathological T (pT)" "Pathological T category (UICC TNM)."
+* pathologicalT from BCRTNMTVS (extensible)
+* pathologicalN 0..1 code "Pathological N (pN)" "Pathological N category (UICC TNM)."
+* pathologicalN from BCRTNMNVS (extensible)
+* pathologicalM 0..1 code "Pathological M (pM)" "Pathological M category (UICC TNM)."
+* pathologicalM from BCRTNMMVS (extensible)
 
-* postNeoadjuvantT 0..1 string "Post-neoadjuvant pathological T (ypT)" "Pathological T after neoadjuvant therapy."
-* postNeoadjuvantN 0..1 string "Post-neoadjuvant pathological N (ypN)" "Pathological N after neoadjuvant therapy."
-* postNeoadjuvantM 0..1 string "Post-neoadjuvant pathological M (ypM)" "Pathological M after neoadjuvant therapy."
+* postNeoadjuvantT 0..1 code "Post-neoadjuvant pathological T (ypT)" "Pathological T after neoadjuvant therapy."
+* postNeoadjuvantT from BCRTNMTVS (extensible)
+* postNeoadjuvantN 0..1 code "Post-neoadjuvant pathological N (ypN)" "Pathological N after neoadjuvant therapy."
+* postNeoadjuvantN from BCRTNMNVS (extensible)
+* postNeoadjuvantM 0..1 code "Post-neoadjuvant pathological M (ypM)" "Pathological M after neoadjuvant therapy."
+* postNeoadjuvantM from BCRTNMMVS (extensible)
 
 // Section 9 — alternative classification
 * otherClassification 0..1 code "Other classification" """
@@ -122,8 +132,3 @@ Chronology code. Codes:
   * startDate 1..1 date "Start date" "Episode start date."
   * endDate 0..1 date "End date" "Episode end date when known."
   * comment 0..1 string "Comment" "Free-text comment, required only for code 80 (other treatment)."
-
-// ----------------------------------------------------------------------------
-// Section 11: attached MOC report(s) — only for breast tumours per footnote 7.
-// ----------------------------------------------------------------------------
-* mocReport 0..* Attachment "Attached MOC report(s)" "MOC report(s) attached to the form. Only required for breast tumours per footnote 7 of Bijlage 55."

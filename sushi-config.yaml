@@ -18,6 +18,10 @@ publisher:
 
 dependencies:
   hl7.fhir.uv.extensions.r5: 5.2.0
+  # SDC has no FHIR R5 release; the R4 package is loaded cross-version so the
+  # extraction/population extension definitions (and the questionnaire-item-control
+  # `tab` code) resolve. See TIRO_INTEGRATION.md.
+  hl7.fhir.uv.sdc: 4.0.0
 
 parameters:
   apply-publisher: true
