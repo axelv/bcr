@@ -18,12 +18,25 @@ Title: "BCR Registration Task"
 Description: """
 The hospital's obligation to register a new cancer case with the Belgian Cancer
 Registry, tracked across the whole lifecycle of submission and (re)validation.
+The national service creates this Task when the hospital posts the `Condition`
+that opens the case; `focus` points back at that `Condition`.
 
-`status` is **forward-only** (`requested → in-progress → completed`, or
-`cancelled`/`failed` as terminal exits). All of the back-and-forth of repeated
-validation attempts is reflected in `businessStatus`, not by rewinding `status`.
-Each validation attempt is a separate `BCRValidationTask` linked via
-`Task.partOf`.
+`status` is **forward-only**: `ready → in-progress → completed`, or
+`cancelled`/`failed` as terminal exits.
+
+- `ready → in-progress` is a side effect of the **first** `QuestionnaireResponse`
+  submission (the first `BCRValidationTask`).
+- `in-progress → completed` may be performed by **either** the registry or the
+  hospital once they consider the oncology case complete — but only after a
+  submission with `final` intent (see `BCRValidationTask`) has validated
+  successfully.
+
+All of the back-and-forth of repeated validation attempts is reflected in
+`businessStatus`, not by rewinding `status`. Each validation attempt is a
+separate `BCRValidationTask` linked via `Task.partOf`. A **correction after
+completion** (a new `BCRValidationTask` arriving while this Task is already
+`completed`) does **not** rewind `status`; it is reflected in `businessStatus`
+and the new validation Task.
 
 **Draft — confirm with BCR.**
 """
@@ -35,8 +48,8 @@ Each validation attempt is a separate `BCRValidationTask` linked via
 * intent = #order
 * code 1..1 MS
 * code = BCRTaskCode#register-cancer-case
-* focus 0..1 MS
-* focus only Reference(Questionnaire)
+* focus 1..1 MS
+* focus only Reference(Condition)
 * for 1..1 MS
 * for only Reference(Patient)
 * requester 1..1 MS
@@ -74,6 +87,11 @@ lifecycle of *this attempt only*:
 - `failed` — validation found blocking errors; `statusReason` gives the coded
   reason and `output` references the `OperationOutcome` listing the issues.
 
+Every attempt declares a **submission intent** (`partial` or `final`) as a typed
+`input`. The parent `BCRRegistrationTask` can only be closed after an attempt
+with `final` intent validates successfully; a successful `partial` attempt
+leaves the registration open (`businessStatus = partially-accepted`).
+
 Attempts are linked to their parent `BCRRegistrationTask` via `Task.partOf`
 and ordered by `authoredOn`; a corrected resubmission is simply a new
 `BCRValidationTask`. **Draft — confirm with BCR.**
@@ -103,9 +121,14 @@ and ordered by `authoredOn`; a corrected resubmission is simply a new
 * input ^slicing.discriminator.path = "type"
 * input ^slicing.rules = #open
 * input ^slicing.description = "Typed inputs of the validation attempt"
-* input contains questionnaireResponse 1..1 MS
+* input contains
+    questionnaireResponse 1..1 MS and
+    submissionIntent 1..1 MS
 * input[questionnaireResponse].type = BCRTaskIO#questionnaire-response
 * input[questionnaireResponse].value[x] only Reference(QuestionnaireResponse)
+* input[submissionIntent].type = BCRTaskIO#submission-intent
+* input[submissionIntent].value[x] only CodeableConcept
+* input[submissionIntent].value[x] from BCRSubmissionIntentVS (required)
 // Typed outputs: the validation outcome and (on success) the registration id
 * output ^slicing.discriminator.type = #pattern
 * output ^slicing.discriminator.path = "type"

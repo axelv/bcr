@@ -33,3 +33,11 @@ Description: "All codes from BCRTaskIO. **Draft — confirm with BCR.**"
 * ^status = #draft
 * ^experimental = true
 * include codes from system BCRTaskIO
+
+ValueSet: BCRSubmissionIntentVS
+Id: bcr-submission-intent-vs
+Title: "BCR Submission Intent"
+Description: "All codes from BCRSubmissionIntent. **Draft — confirm with BCR.**"
+* ^status = #draft
+* ^experimental = true
+* include codes from system BCRSubmissionIntent
