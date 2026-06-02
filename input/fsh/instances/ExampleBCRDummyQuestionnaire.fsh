@@ -1,5 +1,4 @@
 Alias: $itemControl = http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl
-Alias: $qItemControl = http://hl7.org/fhir/questionnaire-item-control
 Alias: $tiroItemControl = http://fhir.tiro.health/CodeSystem/tiro-item-control
 Alias: $BCRForm = https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form
 Alias: $VS = https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet
@@ -27,7 +26,7 @@ Usage: #example
 * item[=].text = "Patient identification"
 * item[=].type = #group
 * item[=].extension[+].url = $itemControl
-* item[=].extension[=].valueCodeableConcept.coding[+].system = $qItemControl
+* item[=].extension[=].valueCodeableConcept.coding[+].system = $tiroItemControl
 * item[=].extension[=].valueCodeableConcept.coding[=].code = #tab
 * item[=].extension[=].valueCodeableConcept.coding[+].system = $tiroItemControl
 * item[=].extension[=].valueCodeableConcept.coding[=].code = #block
@@ -64,7 +63,7 @@ Usage: #example
 * item[=].text = "Tumour identification & staging"
 * item[=].type = #group
 * item[=].extension[+].url = $itemControl
-* item[=].extension[=].valueCodeableConcept.coding[+].system = $qItemControl
+* item[=].extension[=].valueCodeableConcept.coding[+].system = $tiroItemControl
 * item[=].extension[=].valueCodeableConcept.coding[=].code = #tab
 * item[=].extension[=].valueCodeableConcept.coding[+].system = $tiroItemControl
 * item[=].extension[=].valueCodeableConcept.coding[=].code = #block
@@ -191,7 +190,7 @@ Usage: #example
 * item[=].text = "Diagnosis & treatments"
 * item[=].type = #group
 * item[=].extension[+].url = $itemControl
-* item[=].extension[=].valueCodeableConcept.coding[+].system = $qItemControl
+* item[=].extension[=].valueCodeableConcept.coding[+].system = $tiroItemControl
 * item[=].extension[=].valueCodeableConcept.coding[=].code = #tab
 * item[=].extension[=].valueCodeableConcept.coding[+].system = $tiroItemControl
 * item[=].extension[=].valueCodeableConcept.coding[=].code = #block
@@ -252,7 +251,7 @@ Usage: #example
 * item[=].text = "Attachments"
 * item[=].type = #group
 * item[=].extension[+].url = $itemControl
-* item[=].extension[=].valueCodeableConcept.coding[+].system = $qItemControl
+* item[=].extension[=].valueCodeableConcept.coding[+].system = $tiroItemControl
 * item[=].extension[=].valueCodeableConcept.coding[=].code = #tab
 * item[=].extension[=].valueCodeableConcept.coding[+].system = $tiroItemControl
 * item[=].extension[=].valueCodeableConcept.coding[=].code = #block
