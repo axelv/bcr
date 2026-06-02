@@ -94,8 +94,9 @@ links. Applies to **every** Questionnaire.
 | `tiro-template/` | Forked IG template package (from `fhir.base.template`). Contains all build machinery. |
 | `tiro-template/package/package.json` | Template identity: `health.tiro.fhir.template@0.1.0`, `based-on: fhir.base.template`. |
 | `ig.ini` | `template = https://github.com/Tiro-health/ig-template-fhir`. |
-| `sushi-config.yaml` | `fhirVersion: 5.0.0`, dependency `hl7.fhir.uv.extensions.r5`. |
-| `input/ignoreWarnings.txt` | Suppresses `Unknown_Code_in_Version` for the `tab` itemControl code. |
+| `sushi-config.yaml` | `fhirVersion: 4.0.1`, dependency `hl7.fhir.uv.extensions.r4`; `special-url` whitelists the Tiro CodeSystem canonical. |
+| `input/fsh/codesystems/TiroItemControl.fsh` | Defines the `tiro-item-control` CodeSystem (`tab`, `block`) so the renderer's itemControl codes validate. |
+| `input/ignoreWarnings.txt` | No suppressions needed (the former `tab` suppression is obsolete). |
 | `_genonce.sh`, `.github/workflows/ig-publisher.yml` | Build orchestration: SUSHI → IG Publisher. |
 
 All the template machinery (layout, navtabs override, narrative, SDK,
@@ -109,30 +110,31 @@ Each top-level group in the questionnaire carries a
 
 | System | Code | Purpose |
 |---|---|---|
-| `http://hl7.org/fhir/questionnaire-item-control` | `tab` | Standard SDC hint — render as a tab in the form. |
+| `http://fhir.tiro.health/CodeSystem/tiro-item-control` | `tab` | Render this group as a tab in the form. |
 | `http://fhir.tiro.health/CodeSystem/tiro-item-control` | `block` | Tiro-specific layout hint. |
 
 The Tiro renderer reads both and displays the four top-level groups (Patient
 identification, Tumour identification & staging, Diagnosis & treatments,
 Attachments) as tabs.
 
+Both codes live on the Tiro `tiro-item-control` CodeSystem
+(`input/fsh/codesystems/TiroItemControl.fsh`). `tab` previously sat on the core
+`http://hl7.org/fhir/questionnaire-item-control` system as a "standard SDC hint",
+but that code does not exist in FHIR R4 (R4 core defines only
+`group`/`question`/`text`), so on R4 it is hosted on the Tiro system instead.
+
 ## Known issues and caveats
 
-1. **`Unknown_Code_in_Version` "errors".** The base R5 `questionnaire-item-control`
-   codesystem does not include `tab` — it lives in the SDC IG, which we do not
-   depend on. We suppress the warning in `ignoreWarnings.txt`; the matching
-   message id attaches our editor comment but the IG Publisher still counts
-   them in the QA total. Build still exits 0, so non-blocking.
-2. **HL7 ci-build incompatibility.** The HTMLInspector flags the inline FHIR
+1. **HL7 ci-build incompatibility.** The HTMLInspector flags the inline FHIR
    JSON `<script type="application/fhir+json">` and the custom element
    `<tiro-form-filler>` (unknown HTML tag). These are warnings on a private
    build but would become errors on `ci.fhir.org`. The SDK itself is now
    vendored same-origin so it no longer triggers a script-src error.
-3. **SDC `$populate` returns 422.** The Tiro SDC backend at
+2. **SDC `$populate` returns 422.** The Tiro SDC backend at
    `sdc.tiro.health/fhir/r5` does not recognize our canonical
    (`…/Questionnaire/ExampleBCRDummyQuestionnaire`) and rejects pre-population.
    The form still renders fully editable — only auto-population fails.
-4. **Template version pinning.** `ig.ini` references the template by plain
+3. **Template version pinning.** `ig.ini` references the template by plain
    GitHub URL, which resolves to the default branch (`master`). Builds float
    on whatever's on `master`. Pin to a tag/release if reproducibility matters.
 
@@ -140,9 +142,9 @@ Attachments) as tabs.
 
 - Rename `ExampleBCRDummyQuestionnaire` → something more accurate (e.g.
   `BCRCancerRegistrationFormQuestionnaire`). Cascades to filenames + FSH id.
-- Decide whether to register the Tiro item-control CodeSystem
-  (`http://fhir.tiro.health/CodeSystem/tiro-item-control`) in this IG or treat
-  it as external.
+- Consider moving the `tiro-item-control` CodeSystem into the shared
+  `Tiro-health/ig-template-fhir` template so every IG using the template
+  inherits it, rather than defining it per-IG (it lives in this IG today).
 - The template ships the full `fhir.base.template` config (not a partial
   overlay) because github-fetched templates don't merge base config. When
   `fhir.base.template` releases a new config, the template's `config.json`
