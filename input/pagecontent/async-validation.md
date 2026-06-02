@@ -42,11 +42,20 @@ And the workflow is split into **two Tasks** so neither one ever has to move bac
 
 ```mermaid
 flowchart BT
-    V1["BCRValidationTask · attempt 1 (sub-task)<br/>requested → received → accepted → in-progress → failed<br/>output → OperationOutcome (errors)"]
-    V2["BCRValidationTask · attempt 2 (sub-task)<br/>requested → … → completed<br/>output → OperationOutcome + registration-id"]
-    R["BCRRegistrationTask — parent obligation, long-lived (one per cancer case)<br/>requester = Cancer Registry · owner = hospital · focus = Questionnaire<br/>status: requested → in-progress → completed (forward only)<br/>businessStatus: awaiting-data → under-validation → correction-required → accepted<br/>output: registration-id (on acceptance)"]
+    R["<b>BCRRegistrationTask</b><br/>registration obligation · long-lived"]
+    V1["<b>BCRValidationTask</b><br/>attempt 1 — failed"]
+    V2["<b>BCRValidationTask</b><br/>attempt 2 — completed"]
     V1 -->|partOf| R
     V2 -->|partOf| R
+
+    click R "StructureDefinition-bcr-registration-task.html" "BCRRegistrationTask profile" _blank
+    click V1 "Task-ExampleBCRValidationTaskFailed.html" "Failed attempt (example)" _blank
+    click V2 "Task-ExampleBCRValidationTaskAccepted.html" "Accepted attempt (example)" _blank
+
+    classDef parent fill:#eef2ff,stroke:#4f46e5,stroke-width:2px,color:#1e1b4b;
+    classDef attempt fill:#f0fdf4,stroke:#16a34a,color:#14532d;
+    class R parent
+    class V1,V2 attempt
 ```
 
 Read the arrows as the FHIR reference: `BCRValidationTask.partOf → BCRRegistrationTask`.
@@ -67,6 +76,9 @@ sequenceDiagram
     actor HIS as Physician / HIS
     participant SVR as National FHIR validation service
 
+    links HIS: {"Submitted QuestionnaireResponse": "QuestionnaireResponse-ExampleBCRSubmittedQuestionnaireResponse.html", "Registration Task": "Task-ExampleBCRRegistrationTask.html", "Result Subscription": "Subscription-ExampleBCRValidationSubscription.html"}
+    links SVR: {"Validation Task — attempt 1 (failed)": "Task-ExampleBCRValidationTaskFailed.html", "Validation Task — attempt 2 (accepted)": "Task-ExampleBCRValidationTaskAccepted.html", "Validation Outcome (errors)": "OperationOutcome-ExampleBCRValidationOutcomeFailed.html", "Validation Outcome (accepted)": "OperationOutcome-ExampleBCRValidationOutcomeAccepted.html"}
+
     HIS->>HIS: Complete form (QuestionnaireResponse.status = completed)
     loop until accepted
         HIS->>SVR: POST Bundle (new BCRValidationTask + QuestionnaireResponse)
@@ -81,6 +93,8 @@ sequenceDiagram
         end
     end
 ```
+
+*Tip: click a participant box (**Physician / HIS** or the **validation service**) to open a menu of the related example resources.*
 
 ### Status & output mapping
 
