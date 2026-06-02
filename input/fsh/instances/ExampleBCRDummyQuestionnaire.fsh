@@ -52,7 +52,7 @@ Usage: #example
 
 * item[=].item[+].linkId = "patient.sex"
 * item[=].item[=].text = "Sex"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].required = true
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-sex-at-birth-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.sex"
@@ -77,47 +77,47 @@ Usage: #example
 
 * item[=].item[+].linkId = "tumour.basisOfDiagnosis"
 * item[=].item[=].text = "Basis of diagnosis"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].required = true
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-basis-of-diagnosis-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.basisOfDiagnosis"
 
 * item[=].item[+].linkId = "tumour.whoPerformanceScore"
 * item[=].item[=].text = "WHO performance score at diagnosis"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-who-performance-score-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.whoPerformanceScore"
 
 * item[=].item[+].linkId = "tumour.primaryTumourLocation"
 * item[=].item[=].text = "Primary tumour localisation (ICD-O-3 topography)"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].required = true
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-topography-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.primaryTumourLocation"
 
 * item[=].item[+].linkId = "tumour.laterality"
 * item[=].item[=].text = "Laterality"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-laterality-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.laterality"
 
 * item[=].item[+].linkId = "tumour.histologyMorphology"
 * item[=].item[=].text = "Histology — morphology (ICD-O-3)"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].required = true
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-morphology-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.histologyMorphology"
 
 * item[=].item[+].linkId = "tumour.histologyBehaviour"
 * item[=].item[=].text = "Histology — behaviour"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].required = true
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-behaviour-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.histologyBehaviour"
 
 * item[=].item[+].linkId = "tumour.differentiationGrade"
 * item[=].item[=].text = "Differentiation grade"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-differentiation-grade-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.differentiationGrade"
 
@@ -175,7 +175,7 @@ Usage: #example
 // Other classification (section 9)
 * item[=].item[+].linkId = "tumour.otherClassification"
 * item[=].item[=].text = "Other classification"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-other-classification-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.otherClassification"
 
@@ -198,7 +198,7 @@ Usage: #example
 
 * item[=].item[+].linkId = "treatment.clinicalTrial"
 * item[=].item[=].text = "Clinical trial participation"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-clinical-trial-indicator-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.clinicalTrialParticipation"
 
@@ -219,7 +219,7 @@ Usage: #example
 
 * item[=].item[=].item[+].linkId = "treatment.episode.code"
 * item[=].item[=].item[=].text = "Diagnosis / treatment code"
-* item[=].item[=].item[=].type = #coding
+* item[=].item[=].item[=].type = #choice
 * item[=].item[=].item[=].required = true
 * item[=].item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-treatment-chronology-vs"
 * item[=].item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.treatmentEpisode.code"
