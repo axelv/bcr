@@ -1,22 +1,18 @@
 Alias: $itemControl = http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl
-Alias: $qItemControl = http://hl7.org/fhir/questionnaire-item-control
 Alias: $tiroItemControl = http://fhir.tiro.health/CodeSystem/tiro-item-control
 Alias: $BCRForm = https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form
 Alias: $VS = https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet
 
 // UICC TNM top-level categories as coded quick-pick options for the T/N/M items.
-// answerConstraint = #optionsOrType keeps subcategories (T1a, T1mi, N2b, M1c)
-// enterable as additional codings.
+// The value sets are extensible, so subcategories (T1a, T1mi, N2b, M1c) can still
+// be recorded. (FHIR R4 has no `answerConstraint`; that R5 element is omitted.)
 RuleSet: TNMOptionsT
-* item[=].item[=].item[=].answerConstraint = #optionsOrType
 * item[=].item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-tnm-t-vs"
 
 RuleSet: TNMOptionsN
-* item[=].item[=].item[=].answerConstraint = #optionsOrType
 * item[=].item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-tnm-n-vs"
 
 RuleSet: TNMOptionsM
-* item[=].item[=].item[=].answerConstraint = #optionsOrType
 * item[=].item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-tnm-m-vs"
 
 Instance: BCRCancerRegistrationFormQuestionnaire
@@ -63,13 +59,13 @@ Usage: #definition
 * item[=].text = "Patient identification"
 * item[=].type = #group
 * item[=].extension[+].url = $itemControl
-* item[=].extension[=].valueCodeableConcept.coding[+].system = $qItemControl
+* item[=].extension[=].valueCodeableConcept.coding[+].system = $tiroItemControl
 * item[=].extension[=].valueCodeableConcept.coding[=].code = #tab
 * item[=].extension[=].valueCodeableConcept.coding[+].system = $tiroItemControl
 * item[=].extension[=].valueCodeableConcept.coding[=].code = #block
 // Bind %patientRes to the launched Patient for the population expressions below.
 * item[=].extension[+].url = $sdcItemPopCtx
-* item[=].extension[=].valueExpression.name = #patientRes
+* item[=].extension[=].valueExpression.name = "patientRes"
 * item[=].extension[=].valueExpression.language = #text/fhirpath
 * item[=].extension[=].valueExpression.expression = "%patient"
 
@@ -102,7 +98,7 @@ Usage: #definition
 
 * item[=].item[+].linkId = "patient.sex"
 * item[=].item[=].text = "Sex"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].required = true
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-sex-at-birth-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.sex"
@@ -117,7 +113,7 @@ Usage: #definition
 * item[=].text = "Tumour identification & staging"
 * item[=].type = #group
 * item[=].extension[+].url = $itemControl
-* item[=].extension[=].valueCodeableConcept.coding[+].system = $qItemControl
+* item[=].extension[=].valueCodeableConcept.coding[+].system = $tiroItemControl
 * item[=].extension[=].valueCodeableConcept.coding[=].code = #tab
 * item[=].extension[=].valueCodeableConcept.coding[+].system = $tiroItemControl
 * item[=].extension[=].valueCodeableConcept.coding[=].code = #block
@@ -130,25 +126,25 @@ Usage: #definition
 
 * item[=].item[+].linkId = "tumour.basisOfDiagnosis"
 * item[=].item[=].text = "Basis of diagnosis"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].required = true
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-basis-of-diagnosis-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.basisOfDiagnosis"
 
 * item[=].item[+].linkId = "tumour.whoPerformanceScore"
 * item[=].item[=].text = "WHO performance score at diagnosis"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-who-performance-score-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.whoPerformanceScore"
 
 * item[=].item[+].linkId = "tumour.primaryTumourLocation"
 * item[=].item[=].text = "Primary tumour localisation (ICD-O-3 topography)"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].required = true
 // ICD-O-3 cannot be expanded (only a fragment is on the terminology server), so
-// the most common primary sites are inlined as answerOption. answerConstraint
-// keeps any other ICD-O-3 topography code (C00–C80) enterable.
-* item[=].item[=].answerConstraint = #optionsOrType
+// the most common primary sites are inlined as answerOption. (FHIR R4 has no
+// `answerConstraint`; that R5 element, which would keep any other ICD-O-3
+// topography code C00–C80 enterable, is omitted.)
 * item[=].item[=].answerOption[+].valueCoding = $ICDO3#C50.9 "Breast, NOS"
 * item[=].item[=].answerOption[+].valueCoding = $ICDO3#C34.9 "Lung / bronchus, NOS"
 * item[=].item[=].answerOption[+].valueCoding = $ICDO3#C61.9 "Prostate gland"
@@ -173,19 +169,19 @@ Usage: #definition
 
 * item[=].item[+].linkId = "tumour.laterality"
 * item[=].item[=].text = "Laterality"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-laterality-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.laterality"
 
 * item[=].item[+].linkId = "tumour.histologyMorphology"
 * item[=].item[=].text = "Histology — morphology (ICD-O-3)"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].required = true
 // ICD-O-3 cannot be expanded (only a fragment is on the terminology server), so
-// the most common histologies are inlined as answerOption. answerConstraint
-// keeps any other ICD-O-3 morphology code enterable. Behaviour is captured
-// separately on histologyBehaviour.
-* item[=].item[=].answerConstraint = #optionsOrType
+// the most common histologies are inlined as answerOption. Behaviour is captured
+// separately on histologyBehaviour. (FHIR R4 has no `answerConstraint`; that R5
+// element, which would keep any other ICD-O-3 morphology code enterable, is
+// omitted.)
 * item[=].item[=].answerOption[+].valueCoding = $ICDO3#8000 "Neoplasm, malignant"
 * item[=].item[=].answerOption[+].valueCoding = $ICDO3#8010 "Carcinoma, NOS"
 * item[=].item[=].answerOption[+].valueCoding = $ICDO3#8070 "Squamous cell carcinoma, NOS"
@@ -210,14 +206,14 @@ Usage: #definition
 
 * item[=].item[+].linkId = "tumour.histologyBehaviour"
 * item[=].item[=].text = "Histology — behaviour"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].required = true
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-behaviour-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.histologyBehaviour"
 
 * item[=].item[+].linkId = "tumour.differentiationGrade"
 * item[=].item[=].text = "Differentiation grade"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-differentiation-grade-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.differentiationGrade"
 
@@ -284,7 +280,7 @@ Usage: #definition
 // Other classification (section 9)
 * item[=].item[+].linkId = "tumour.otherClassification"
 * item[=].item[=].text = "Other classification"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-other-classification-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.otherClassification"
 
@@ -300,14 +296,14 @@ Usage: #definition
 * item[=].text = "Diagnosis & treatments"
 * item[=].type = #group
 * item[=].extension[+].url = $itemControl
-* item[=].extension[=].valueCodeableConcept.coding[+].system = $qItemControl
+* item[=].extension[=].valueCodeableConcept.coding[+].system = $tiroItemControl
 * item[=].extension[=].valueCodeableConcept.coding[=].code = #tab
 * item[=].extension[=].valueCodeableConcept.coding[+].system = $tiroItemControl
 * item[=].extension[=].valueCodeableConcept.coding[=].code = #block
 
 * item[=].item[+].linkId = "treatment.clinicalTrial"
 * item[=].item[=].text = "Clinical trial participation"
-* item[=].item[=].type = #coding
+* item[=].item[=].type = #choice
 * item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-clinical-trial-indicator-vs"
 * item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.clinicalTrialParticipation"
 
@@ -328,7 +324,7 @@ Usage: #definition
 
 * item[=].item[=].item[+].linkId = "treatment.episode.code"
 * item[=].item[=].item[=].text = "Diagnosis / treatment code"
-* item[=].item[=].item[=].type = #coding
+* item[=].item[=].item[=].type = #choice
 * item[=].item[=].item[=].required = true
 * item[=].item[=].item[=].answerValueSet = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/ValueSet/bcr-treatment-chronology-vs"
 * item[=].item[=].item[=].definition = "https://www.ehealth.fgov.be/standards/fhir/registries/bcr/StructureDefinition/bcr-cancer-registration-form#bcr-cancer-registration-form.treatmentEpisode.code"
