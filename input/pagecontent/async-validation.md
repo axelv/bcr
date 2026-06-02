@@ -73,7 +73,7 @@ legally mandated registry.
 ```mermaid
 sequenceDiagram
     autonumber
-    actor HIS as Physician / HIS
+    participant HIS as Physician / HIS
     participant SVR as National FHIR validation service
 
     links HIS: {"Submitted QuestionnaireResponse": "QuestionnaireResponse-ExampleBCRSubmittedQuestionnaireResponse.html", "Registration Task": "Task-ExampleBCRRegistrationTask.html", "Result Subscription": "Subscription-ExampleBCRValidationSubscription.html"}
