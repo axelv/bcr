@@ -40,6 +40,8 @@ pages:
     title: Background
   dataflow.md:
     title: Data flow
+  async-validation.md:
+    title: FHIR asynchronous validation
   models.md:
     title: Models
   terminology.md:
@@ -51,6 +53,7 @@ menu:
   Home: index.html
   Background: background.html
   Data flow: dataflow.html
+  Async validation: async-validation.html
   Models: models.html
   Terminology: terminology.html
   Artifacts: artifacts.html
