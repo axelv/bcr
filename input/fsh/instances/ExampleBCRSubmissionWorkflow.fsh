@@ -41,6 +41,23 @@ Usage: #example
 * name = "BCR FHIR Validation Service"
 
 // ----------------------------------------------------------------------------
+// The Condition that opens the case — posted by the hospital to trigger
+// registration; the registration Task's `focus` points back at it.
+// ----------------------------------------------------------------------------
+Instance: ExampleBCRCancerCondition
+InstanceOf: Condition
+Title: "Example Cancer Case (Condition)"
+Description: "The malignant breast neoplasm whose registration this workflow tracks. The hospital posts this Condition to the national service, which creates the BCRRegistrationTask from it."
+Usage: #example
+* clinicalStatus = http://terminology.hl7.org/CodeSystem/condition-clinical#active "Active"
+* verificationStatus = http://terminology.hl7.org/CodeSystem/condition-ver-status#confirmed "Confirmed"
+* category = http://terminology.hl7.org/CodeSystem/condition-category#encounter-diagnosis "Encounter Diagnosis"
+* code = $SCT#254837009 "Malignant tumor of breast"
+* code.coding[+] = $ICD10#C50.9 "Malignant neoplasm of breast, unspecified"
+* subject = Reference(BCRExamplePatient) "Example Patient"
+* recordedDate = "2026-05-19"
+
+// ----------------------------------------------------------------------------
 // The submitted QuestionnaireResponse (attempt 1 — topography omitted)
 // ----------------------------------------------------------------------------
 Instance: ExampleBCRSubmittedQuestionnaireResponse
@@ -107,6 +124,8 @@ Usage: #example
 * owner = Reference(BCRExampleValidationService) "BCR FHIR Validation Service"
 * input[questionnaireResponse].type = BCRTaskIO#questionnaire-response
 * input[questionnaireResponse].valueReference = Reference(ExampleBCRSubmittedQuestionnaireResponse)
+* input[submissionIntent].type = BCRTaskIO#submission-intent
+* input[submissionIntent].valueCodeableConcept = BCRSubmissionIntent#final "Final submission"
 * output[validationOutcome].type = BCRTaskIO#validation-outcome
 * output[validationOutcome].valueReference = Reference(ExampleBCRValidationOutcomeFailed)
 
@@ -127,6 +146,8 @@ Usage: #example
 * owner = Reference(BCRExampleValidationService) "BCR FHIR Validation Service"
 * input[questionnaireResponse].type = BCRTaskIO#questionnaire-response
 * input[questionnaireResponse].valueReference = Reference(ExampleBCRSubmittedQuestionnaireResponse)
+* input[submissionIntent].type = BCRTaskIO#submission-intent
+* input[submissionIntent].valueCodeableConcept = BCRSubmissionIntent#final "Final submission"
 * output[validationOutcome].type = BCRTaskIO#validation-outcome
 * output[validationOutcome].valueReference = Reference(ExampleBCRValidationOutcomeAccepted)
 * output[registrationId].type = BCRTaskIO#registration-id
@@ -147,7 +168,7 @@ Usage: #example
 * code = BCRTaskCode#register-cancer-case
 * authoredOn = "2026-05-19T08:00:00+02:00"
 * lastModified = "2026-05-20T10:31:00+02:00"
-* focus = Reference(ExampleBCRDummyQuestionnaire) "BCR Cancer Registration Form"
+* focus = Reference(ExampleBCRCancerCondition) "Malignant tumor of breast"
 * for = Reference(BCRExamplePatient) "Example Patient"
 * requester = Reference(BCRExampleRegistry) "Belgian Cancer Registry"
 * owner = Reference(BCRExampleHospital) "Example Oncology Hospital"
