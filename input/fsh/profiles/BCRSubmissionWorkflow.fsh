@@ -79,7 +79,10 @@ A single submission of a completed cancer-registration `QuestionnaireResponse`
 to the national validation service. Its `status` reflects the validation
 lifecycle of *this attempt only*:
 
-`requested → received → accepted → in-progress → completed | failed`
+`requested → in-progress → completed | failed`
+
+The client POSTs the Task as `requested`; on receipt the server moves it
+straight to `in-progress` and validates in the background.
 
 - `completed` — validation passed; `output` carries the validation
   `OperationOutcome` and (on success) the registry `registration-id`.
