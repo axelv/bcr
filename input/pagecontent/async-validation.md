@@ -141,17 +141,17 @@ stateDiagram-v2
     terminal --> [*]
 ```
 
-**`BCRValidationTask.status`** — one short-lived machine per submission attempt;
-a failed attempt is terminal, and a correction is simply a new Task:
+**`BCRValidationTask.status`** — one short-lived machine per submission attempt.
+The client POSTs the Task as `requested`; on receipt the server moves it straight
+to `in-progress` and validates in the background. A failed attempt is terminal,
+and a correction is simply a new Task:
 
 ```mermaid
 stateDiagram-v2
     direction LR
     state "in-progress" as inprogress
-    [*] --> requested
-    requested --> received
-    received --> accepted
-    accepted --> inprogress
+    [*] --> requested: client POSTs the validation Task
+    requested --> inprogress: server receives it, background validation starts
     inprogress --> completed: validation passed
     inprogress --> failed: blocking errors
     completed --> [*]
@@ -167,8 +167,7 @@ recent validation attempt (its `status`, `submission-intent` and `output`).
 | Stage / result | `BCRValidationTask.status` | `BCRRegistrationTask.status` | Derived situation | `Task.output` |
 |---|---|---|---|---|
 | Case opened (Condition posted) | — | `ready` | awaiting data | — |
-| Queued at server | `received` / `accepted` | `in-progress` | submitted | — |
-| Validating | `in-progress` | `in-progress` | under validation | — |
+| Submitted, validating | `in-progress` | `in-progress` | under validation | — |
 | Valid, **partial** submission | `completed` | `in-progress` | partially accepted (case still open) | OperationOutcome (information) |
 | Valid, **final** submission | `completed` | `completed` | accepted | OperationOutcome (information) + registration-id |
 | Valid, warnings only (final) | `completed` | `completed` | accepted with warnings | OperationOutcome (warning) + registration-id |
@@ -228,7 +227,7 @@ its `submission-intent` (`partial` or `final`):
 
 The created validation `Task` **is** the durable async job handle — validation
 itself happens in the background, so the server can return immediately with the
-Task in `received`/`accepted`. (The synchronous `$validate` operation is *not*
+Task already in `in-progress`. (The synchronous `$validate` operation is *not*
 appropriate here: it is structural and blocking, whereas this validation is
 asynchronous and applies cross-field oncology business rules.)
 
