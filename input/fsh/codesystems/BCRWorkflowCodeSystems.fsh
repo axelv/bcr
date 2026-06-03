@@ -42,6 +42,7 @@ itself never has to move backwards. **Draft — confirm with BCR.**
 * #submitted "Submitted" "A submission has been received by the national server and queued for validation."
 * #under-validation "Under validation" "Asynchronous validation is currently running."
 * #correction-required "Correction required" "The most recent validation attempt failed; a corrected resubmission is expected."
+* #partially-accepted "Partially accepted" "A partial submission validated successfully; the case remains open, awaiting the final submission before the registration can be closed."
 * #accepted "Accepted" "Validation passed and the cancer case has been registered."
 * #accepted-with-warnings "Accepted with warnings" "Validation passed with non-blocking warnings; the case has been registered."
 * #withdrawn "Withdrawn" "The submitter withdrew the registration before it was accepted."
@@ -81,5 +82,26 @@ workflow. **Draft — confirm with BCR.**
 * ^caseSensitive = true
 * ^content = #complete
 * #questionnaire-response "QuestionnaireResponse" "Input: the completed cancer-registration QuestionnaireResponse being validated."
+* #submission-intent "Submission intent" "Input: whether this submission is a partial (interim) or final submission of the registration."
 * #validation-outcome "Validation outcome" "Output: the OperationOutcome carrying the validation result (errors / warnings / success)."
 * #registration-id "Registration identifier" "Output: the registry-assigned identifier issued when a case is accepted."
+
+// ----------------------------------------------------------------------------
+// Submission intent — does this submission attempt close the registration?
+// ----------------------------------------------------------------------------
+CodeSystem: BCRSubmissionIntent
+Id: bcr-submission-intent
+Title: "BCR Submission Intent"
+Description: """
+The submitting hospital's intent for a single `BCRValidationTask`: whether the
+submitted `QuestionnaireResponse` is an interim (**partial**) submission or the
+**final** submission for the cancer case. A `BCRRegistrationTask` may only be
+closed (`status = completed`) after a `final` submission validates successfully.
+**Draft — confirm with BCR.**
+"""
+* ^status = #draft
+* ^experimental = true
+* ^caseSensitive = true
+* ^content = #complete
+* #partial "Partial submission" "An interim submission; the case is not yet complete and a further (final) submission is expected. A successful partial submission does not close the registration."
+* #final "Final submission" "The submission the hospital considers complete; on successful validation the registration can be closed."
