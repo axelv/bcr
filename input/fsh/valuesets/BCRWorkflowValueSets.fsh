@@ -10,14 +10,6 @@ Description: "All codes from BCRTaskCode. **Draft — confirm with BCR.**"
 * ^experimental = true
 * include codes from system BCRTaskCode
 
-ValueSet: BCRTaskBusinessStatusVS
-Id: bcr-task-business-status-vs
-Title: "BCR Task Business Status"
-Description: "All codes from BCRTaskBusinessStatus. **Draft — confirm with BCR.**"
-* ^status = #draft
-* ^experimental = true
-* include codes from system BCRTaskBusinessStatus
-
 ValueSet: BCRTaskStatusReasonVS
 Id: bcr-task-status-reason-vs
 Title: "BCR Task Status Reason"

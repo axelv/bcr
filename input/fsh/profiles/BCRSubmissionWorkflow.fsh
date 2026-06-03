@@ -3,10 +3,10 @@
 // Design (see async-validation.md): a single, long-lived registration
 // obligation Task whose `status` only ever moves FORWARD, with each submission
 // attempt modelled as its own short-lived validation Task. A failed validation
-// is a terminal `failed` validation Task plus `correction-required` on the
-// registration Task's businessStatus — the registration Task's `status` is
-// never rewound. This mirrors the consistent guidance on chat.fhir.org that a
-// Task status machine is forward-only and that "going back" is a new Task.
+// is a terminal `failed` validation Task; the registration Task's `status` is
+// never rewound and the per-attempt state lives in the history of validation
+// Tasks. This mirrors the consistent guidance on chat.fhir.org that a Task
+// status machine is forward-only and that "going back" is a new Task.
 
 // ----------------------------------------------------------------------------
 // Registration obligation — long-lived, one per cancer case
@@ -31,20 +31,19 @@ that opens the case; `focus` points back at that `Condition`.
   submission with `final` intent (see `BCRValidationTask`) has validated
   successfully.
 
-All of the back-and-forth of repeated validation attempts is reflected in
-`businessStatus`, not by rewinding `status`. Each validation attempt is a
-separate `BCRValidationTask` linked via `Task.partOf`. A **correction after
+All of the back-and-forth of repeated validation attempts lives in the **history
+of `BCRValidationTask`s** (one per attempt, linked via `Task.partOf`), not on
+this Task — the current situation (awaiting data, under validation, correction
+required, partially or fully accepted) is **derived** from the most recent
+attempt's `status`, `submission-intent` and `output`. A **correction after
 completion** (a new `BCRValidationTask` arriving while this Task is already
-`completed`) does **not** rewind `status`; it is reflected in `businessStatus`
-and the new validation Task.
+`completed`) does **not** rewind `status`.
 
 **Draft — confirm with BCR.**
 """
 * ^status = #draft
 * ^experimental = true
 * status MS
-* businessStatus 1..1 MS
-* businessStatus from BCRTaskBusinessStatusVS (required)
 * intent = #order
 * code 1..1 MS
 * code = BCRTaskCode#register-cancer-case
@@ -90,7 +89,7 @@ lifecycle of *this attempt only*:
 Every attempt declares a **submission intent** (`partial` or `final`) as a typed
 `input`. The parent `BCRRegistrationTask` can only be closed after an attempt
 with `final` intent validates successfully; a successful `partial` attempt
-leaves the registration open (`businessStatus = partially-accepted`).
+leaves the registration open (`status` stays `in-progress`).
 
 Attempts are linked to their parent `BCRRegistrationTask` via `Task.partOf`
 and ordered by `authoredOn`; a corrected resubmission is simply a new
