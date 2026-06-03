@@ -68,11 +68,13 @@ Read the arrows as the FHIR reference: `BCRRegistrationTask.focus → Condition`
 BCRRegistrationTask`. Each validation attempt is a **sub-task *of*** the single
 registration obligation — not the reverse.
 
-All of the back-and-forth of repeated attempts lives in the registration Task's
-**`businessStatus`** (`correction-required`) and in the **history of validation
-Tasks** — never in a backwards `status` transition. This also preserves a
-complete audit trail (attempt 1 failed, attempt 2 accepted), which matters for a
-legally mandated registry.
+All of the back-and-forth of repeated attempts lives in the **history of
+validation Tasks** — a new `BCRValidationTask` per attempt — never in a
+backwards `status` transition or a cycling field on the registration Task. The
+registration Task carries only its forward-only `status`; its current situation
+(correction required, partially or fully accepted) is **derived** from the most
+recent validation attempt. This also preserves a complete audit trail (attempt 1
+failed, attempt 2 accepted), which matters for a legally mandated registry.
 
 ### Lifecycle
 
@@ -83,32 +85,32 @@ sequenceDiagram
     participant SVR as National FHIR validation service
 
     links HIS: {"Cancer case (Condition)": "Condition-ExampleBCRCancerCondition.html", "Submitted QuestionnaireResponse": "QuestionnaireResponse-ExampleBCRSubmittedQuestionnaireResponse.html", "Result Subscription": "Subscription-ExampleBCRValidationSubscription.html"}
-    links SVR: {"Registration Task": "Task-ExampleBCRRegistrationTask.html", "Validation Task — attempt 1 (failed)": "Task-ExampleBCRValidationTaskFailed.html", "Validation Task — attempt 2 (accepted)": "Task-ExampleBCRValidationTaskAccepted.html", "Validation Outcome (errors)": "OperationOutcome-ExampleBCRValidationOutcomeFailed.html", "Validation Outcome (accepted)": "OperationOutcome-ExampleBCRValidationOutcomeAccepted.html"}
+    links SVR: {"Registration Task": "Task-ExampleBCRRegistrationTask.html", "Validation Task attempt 1 (failed)": "Task-ExampleBCRValidationTaskFailed.html", "Validation Task attempt 2 (accepted)": "Task-ExampleBCRValidationTaskAccepted.html", "Validation Outcome (errors)": "OperationOutcome-ExampleBCRValidationOutcomeFailed.html", "Validation Outcome (accepted)": "OperationOutcome-ExampleBCRValidationOutcomeAccepted.html"}
 
     HIS->>SVR: POST Condition (open the cancer case)
-    SVR->>SVR: Create RegistrationTask (focus → Condition)
-    Note over SVR: RegistrationTask.status = ready<br/>businessStatus = awaiting-data
+    SVR->>SVR: Create RegistrationTask (focus = Condition)
+    Note over SVR: RegistrationTask.status = ready
 
     HIS->>HIS: Complete form (QuestionnaireResponse)
-    loop until accepted
-        HIS->>SVR: POST Bundle (new BCRValidationTask + QuestionnaireResponse)
-        Note over SVR: First submission: RegistrationTask.status ready → in-progress<br/>businessStatus = under-validation<br/>ValidationTask.status = in-progress (background)<br/>ValidationTask.input = submission-intent (partial | final)
+    loop until a final submission is accepted
+        HIS->>SVR: POST Bundle (BCRValidationTask + QuestionnaireResponse)
+        Note over SVR: First submission moves RegistrationTask.status from ready to in-progress<br/>ValidationTask.status = in-progress (background)<br/>ValidationTask.input carries submission-intent, partial or final
         alt validation fails
-            SVR-->>HIS: Subscription notify — ValidationTask.status = failed
-            Note over SVR: statusReason = validation-failed<br/>output → OperationOutcome (errors)<br/>RegistrationTask.businessStatus = correction-required<br/>RegistrationTask.status stays in-progress (no rewind)
+            SVR-->>HIS: Subscription notify, ValidationTask.status = failed
+            Note over SVR: statusReason = validation-failed<br/>output = OperationOutcome (errors)<br/>RegistrationTask.status stays in-progress (no rewind)
             HIS->>HIS: Correct the form and resubmit (a new ValidationTask)
-        else validation passes — partial submission
-            SVR-->>HIS: Subscription notify — ValidationTask.status = completed
-            Note over SVR: RegistrationTask.businessStatus = partially-accepted<br/>status stays in-progress (case not yet closed)
-        else validation passes — final submission
-            SVR-->>HIS: Subscription notify — ValidationTask.status = completed
-            Note over SVR: output → OperationOutcome (info/warnings) + registration-id<br/>RegistrationTask.status = completed · businessStatus = accepted<br/>(closed by registry or hospital)
+        else validation passes, partial submission
+            SVR-->>HIS: Subscription notify, ValidationTask.status = completed
+            Note over SVR: RegistrationTask.status stays in-progress (case not yet closed)
+        else validation passes, final submission
+            SVR-->>HIS: Subscription notify, ValidationTask.status = completed
+            Note over SVR: output = OperationOutcome (info or warnings) + registration-id<br/>RegistrationTask.status = completed (closed by registry or hospital)
         end
     end
 
     opt correction after completion
-        HIS->>SVR: POST Bundle (new BCRValidationTask + corrected QuestionnaireResponse)
-        Note over SVR: RegistrationTask.status stays completed (forward-only)<br/>businessStatus reflects the correction; the new ValidationTask records it
+        HIS->>SVR: POST Bundle (BCRValidationTask + corrected QuestionnaireResponse)
+        Note over SVR: RegistrationTask.status stays completed (forward-only)<br/>the new ValidationTask records the correction
     end
 ```
 
@@ -116,9 +118,10 @@ sequenceDiagram
 
 ### State transition models
 
-Each Task type has its own state machine. The registration obligation carries
-**two independent axes** — a forward-only `status` and a free-moving
-`businessStatus` — while each validation attempt has a single `status`.
+The registration obligation has a single, **forward-only** `status`; each
+validation attempt is a separate short-lived Task with its own `status`. The
+registration Task is never rewound — the back-and-forth of repeated attempts is
+carried by the history of validation Tasks.
 
 **`BCRRegistrationTask.status`** — forward-only; never rewinds:
 
@@ -138,33 +141,8 @@ stateDiagram-v2
     terminal --> [*]
 ```
 
-**`BCRRegistrationTask.businessStatus`** — the deliberately *cyclic* axis where
-the back-and-forth of repeated attempts (and post-completion corrections) lives:
-
-```mermaid
-stateDiagram-v2
-    direction LR
-    state "awaiting-data" as awaiting
-    state "under-validation" as validating
-    state "correction-required" as correction
-    state "partially-accepted" as partial
-    state "accepted" as accepted
-    state "withdrawn" as withdrawn
-    [*] --> awaiting: Task created
-    awaiting --> validating: submission received
-    validating --> correction: validation failed
-    validating --> partial: partial submission passed
-    validating --> accepted: final submission passed
-    correction --> validating: resubmission
-    partial --> validating: next submission
-    accepted --> correction: correction after completion
-    awaiting --> withdrawn: submitter withdraws
-    partial --> withdrawn: submitter withdraws
-    accepted --> [*]
-    withdrawn --> [*]
-```
-
-**`BCRValidationTask.status`** — one short-lived machine per submission attempt:
+**`BCRValidationTask.status`** — one short-lived machine per submission attempt;
+a failed attempt is terminal, and a correction is simply a new Task:
 
 ```mermaid
 stateDiagram-v2
@@ -182,17 +160,21 @@ stateDiagram-v2
 
 ### Status & output mapping
 
-| Stage / result | `BCRValidationTask.status` | `BCRRegistrationTask.status` | `BCRRegistrationTask.businessStatus` | `Task.output` |
+The registration Task carries only its forward-only `status`; the "derived
+situation" column is **not stored** on the Task — it is inferred from the most
+recent validation attempt (its `status`, `submission-intent` and `output`).
+
+| Stage / result | `BCRValidationTask.status` | `BCRRegistrationTask.status` | Derived situation | `Task.output` |
 |---|---|---|---|---|
-| Case opened (Condition posted) | — | `ready` | `awaiting-data` | — |
-| Queued at server | `received` / `accepted` | `in-progress` | `submitted` | — |
-| Validating | `in-progress` | `in-progress` | `under-validation` | — |
-| Valid, **partial** submission | `completed` | `in-progress` | `partially-accepted` | OperationOutcome (information) |
-| Valid, **final** submission | `completed` | `completed` | `accepted` | OperationOutcome (information) + registration-id |
-| Valid, warnings only (final) | `completed` | `completed` | `accepted-with-warnings` | OperationOutcome (warning) + registration-id |
-| Invalid (blocking errors) | `failed` | `in-progress` | `correction-required` | OperationOutcome (error) |
-| System/processing error | `failed` | `in-progress` | `correction-required` | OperationOutcome (exception) |
-| Correction after completion | `completed` / `failed` | `completed` (unchanged) | `correction-required` → `accepted` | OperationOutcome (as above) |
+| Case opened (Condition posted) | — | `ready` | awaiting data | — |
+| Queued at server | `received` / `accepted` | `in-progress` | submitted | — |
+| Validating | `in-progress` | `in-progress` | under validation | — |
+| Valid, **partial** submission | `completed` | `in-progress` | partially accepted (case still open) | OperationOutcome (information) |
+| Valid, **final** submission | `completed` | `completed` | accepted | OperationOutcome (information) + registration-id |
+| Valid, warnings only (final) | `completed` | `completed` | accepted with warnings | OperationOutcome (warning) + registration-id |
+| Invalid (blocking errors) | `failed` | `in-progress` | correction required | OperationOutcome (error) |
+| System/processing error | `failed` | `in-progress` | correction required | OperationOutcome (exception) |
+| Correction after completion | `completed` / `failed` | `completed` (unchanged) | correction → accepted | OperationOutcome (as above) |
 
 **R4 note:** `Task.statusReason` is a `CodeableConcept` in R4 (it only became a
 `CodeableReference` in R5), so it carries a [coded reason](CodeSystem-bcr-task-status-reason.html)
@@ -269,8 +251,8 @@ is submitted.
 Two resources are worth watching, and the hospital can use a Subscription **or**
 polling for either:
 
-- the **validation Task** — the per-attempt result (`completed` / `failed`), as above;
-- the **registration Task** — its `businessStatus` changes (e.g. `partially-accepted`, `correction-required`) and its eventual closure (`status = completed`). Watch it with a second Subscription (`criteria: Task/<registration-task>`) or by polling `GET Task/<registration-task>`.
+- the **validation Tasks** — the per-attempt results (`completed` / `failed`), as above, from which the current situation is derived;
+- the **registration Task** — its eventual closure (`status = completed`). Watch it with a second Subscription (`criteria: Task/<registration-task>`) or by polling `GET Task/<registration-task>`.
 
 Alternatives: **polling** `GET Task/<id>` until terminal; or, for production
 robustness, **topic-based subscriptions** via the [Subscriptions R5 Backport](https://hl7.org/fhir/uv/subscriptions-backport/)
@@ -294,7 +276,6 @@ the physician corrects, attempt 2 is accepted:
 | Profiles | Terminology |
 |---|---|
 | [BCRRegistrationTask](StructureDefinition-bcr-registration-task.html) | [BCR Task Code](CodeSystem-bcr-task-code.html) |
-| [BCRValidationTask](StructureDefinition-bcr-validation-task.html) | [BCR Task Business Status](CodeSystem-bcr-task-business-status.html) |
-| [BCRValidationOutcome](StructureDefinition-bcr-validation-outcome.html) | [BCR Task Status Reason](CodeSystem-bcr-task-status-reason.html) |
-| | [BCR Task Input/Output Type](CodeSystem-bcr-task-io.html) |
+| [BCRValidationTask](StructureDefinition-bcr-validation-task.html) | [BCR Task Status Reason](CodeSystem-bcr-task-status-reason.html) |
+| [BCRValidationOutcome](StructureDefinition-bcr-validation-outcome.html) | [BCR Task Input/Output Type](CodeSystem-bcr-task-io.html) |
 | | [BCR Submission Intent](CodeSystem-bcr-submission-intent.html) |

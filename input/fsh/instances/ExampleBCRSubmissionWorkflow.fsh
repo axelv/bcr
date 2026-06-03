@@ -2,8 +2,9 @@
 // Story: Hospital X submits a cancer registration. Attempt 1 fails validation
 // (topography missing); the physician corrects the form and resubmits;
 // attempt 2 is accepted and the registry issues a registration id. The
-// long-lived registration Task never rewinds its status — it tracks progress
-// via businessStatus and points at the assigned id on acceptance.
+// long-lived registration Task never rewinds its status — progress is tracked
+// through the linked validation Tasks, and it points at the assigned id on
+// acceptance.
 
 // ----------------------------------------------------------------------------
 // Supporting actors
@@ -155,15 +156,15 @@ Usage: #example
 * output[registrationId].valueIdentifier.value = "BCR-2026-0001234"
 
 // ----------------------------------------------------------------------------
-// The long-lived registration obligation (shown mid-flow: correction-required)
+// The long-lived registration obligation (shown mid-flow, awaiting a corrected
+// resubmission after attempt 1 failed)
 // ----------------------------------------------------------------------------
 Instance: ExampleBCRRegistrationTask
 InstanceOf: BCRRegistrationTask
 Title: "Example Registration Task"
-Description: "The hospital's obligation to register the case. Status moves forward only; the failed first attempt is reflected as businessStatus = correction-required."
+Description: "The hospital's obligation to register the case. Status moves forward only (here in-progress, mid-flow); that attempt 1 failed and a correction is expected is derived from the linked BCRValidationTasks, not stored on this Task."
 Usage: #example
 * status = #in-progress
-* businessStatus = BCRTaskBusinessStatus#correction-required
 * intent = #order
 * code = BCRTaskCode#register-cancer-case
 * authoredOn = "2026-05-19T08:00:00+02:00"
