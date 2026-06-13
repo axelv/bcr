@@ -23,6 +23,49 @@ completed registration form to a national FHIR server, which validates it
 | Belgian Cancer Registry | Imposes the registration obligation; requester of the registration Task. |
 | National FHIR validation service | Receives submissions, runs background validation, owns the validation Task. |
 
+### Design rationale: why a `Task`, not `Prefer: respond-async`
+
+FHIR offers two ways to model an asynchronous job, and they are not
+interchangeable:
+
+- The **[Asynchronous Interaction Request pattern](https://hl7.org/fhir/R4/async.html)**
+  (`Prefer: respond-async`, used by Bulk Data `$export`). The server returns
+  `202 Accepted` with a `Content-Location` polling URL; the client polls that URL
+  and gets back a **status JSON document**, not a FHIR resource. This handle is
+  **ephemeral** — it carries no business semantics, is not itself searchable or
+  subscribe-able as a resource, and disappears once the job is collected. It fits
+  a one-shot, fire-and-forget export.
+- A **`Task`** that is created on the server and whose `status` *is* the job
+  status. The handle is a first-class, persistent, searchable resource: it can be
+  watched with a Subscription, it carries typed `input`/`output`, and its history
+  is an audit trail.
+
+This IG uses the **`Task`** approach because the submission is none of the things
+the `respond-async` pattern assumes. It is **long-lived and multi-attempt** (a
+case is corrected and resubmitted until accepted), it must carry **business
+intent** on the job itself (`partial` vs `final`), and — for a legally mandated
+registry — it must leave a **durable, queryable audit trail** of every attempt
+and outcome. A polling-URL status document cannot hold any of that; a `Task`
+graph does. The created validation `Task` **is** the durable async job handle:
+validation runs in the background, so the server returns immediately with the
+Task in `received`/`accepted` and the hospital watches it to terminal state.
+
+This is a well-trodden path, not a local invention. The
+**[Da Vinci CDex Task-Based Approach](https://hl7.org/fhir/us/davinci-cdex/task-based-approach.html)**
+models an asynchronous data request the same way — the requester creates a
+`Task` (`status = requested`), the fulfiller drives it through
+`in-progress → completed | failed | rejected`, results are returned in
+`Task.output`, and the requester polls or subscribes — reusing the shared `Task`
+profile and status value set from
+**[Da Vinci HRex](https://hl7.org/fhir/us/davinci-hrex/)**. The same shape
+appears in **Da Vinci PAS** (pended prior-authorization) and the FHIR
+**[Workflow module](https://hl7.org/fhir/R4/workflow.html)**, where `Task` is the
+resource whose `status` you watch to track fulfillment.
+
+> Note the contrast with the synchronous **`$validate`** operation: `$validate`
+> is structural and blocking, whereas this validation is asynchronous and applies
+> cross-field oncology business rules — so it does not fit `$validate` either.
+
 ### Design principle: Task status moves *forward only*
 
 A submission that can fail and be resubmitted looks, at first glance, like it
@@ -226,11 +269,9 @@ its `submission-intent` (`partial` or `final`):
 }
 ```
 
-The created validation `Task` **is** the durable async job handle — validation
-itself happens in the background, so the server can return immediately with the
-Task in `received`/`accepted`. (The synchronous `$validate` operation is *not*
-appropriate here: it is structural and blocking, whereas this validation is
-asynchronous and applies cross-field oncology business rules.)
+The created validation `Task` **is** the durable async job handle (see *Design
+rationale: why a `Task`* above): the server returns immediately with the Task in
+`received`/`accepted`, and validation runs in the background.
 
 ### Getting the result — Subscription
 
